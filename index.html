@@ -5,118 +5,82 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Buscar Parte</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 40px 20px;
-    }
-
-    .contenedor {
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: #ffffff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      font-size: 24px;
-      color: #333;
-      margin-bottom: 20px;
-    }
-
-    input {
-      padding: 10px;
-      width: calc(100% - 100px);
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      margin-right: 10px;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #007acc;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #005fa3;
-    }
-
-    #resultado {
-      margin-top: 30px;
-      background-color: #f9f9f9;
-      border-left: 4px solid #007acc;
-      padding: 20px;
-      border-radius: 6px;
-    }
-
-    #resultado p {
-      margin: 8px 0;
-    }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 40px 20px; }
+    .contenedor { max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,.1); }
+    h1 { font-size: 24px; color: #333; margin-bottom: 20px; }
+    .fila { display: flex; gap: 10px; }
+    input { padding: 10px; flex: 1; font-size: 16px; border: 1px solid #ccc; border-radius: 6px; }
+    button { padding: 10px 20px; font-size: 16px; background: #007acc; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+    button:hover { background: #005fa3; }
+    #resultado { margin-top: 20px; background: #f9f9f9; border-left: 4px solid #007acc; padding: 16px; border-radius: 6px; }
+    #resultado p { margin: 6px 0; }
+    .muted { color: #666; }
   </style>
 </head>
 <body>
-
   <div class="contenedor">
     <h1>🔍 Buscar Parte</h1>
 
-    <div>
+    <div class="fila">
       <input type="text" id="partNumber" placeholder="Ingrese el número de parte" />
       <button onclick="buscarParte()">Buscar</button>
     </div>
 
-    <div id="resultado"></div>
+    <div id="resultado" class="muted">Ingrese un número de parte y presione Buscar.</div>
   </div>
 
   <script>
+    const API_BASE = "https://api-partes.onrender.com";
+
+    const fmt = (v) => (v === null || v === undefined || v === "" ? "N/A" : `$${v}`);
+
     async function buscarParte() {
       const numeroParte = document.getElementById("partNumber").value.trim();
       const resultadoDiv = document.getElementById("resultado");
 
-      console.log("Buscando:", numeroParte);
+      if (!numeroParte) {
+        resultadoDiv.textContent = "Por favor ingrese un número de parte.";
+        return;
+      }
+
+      resultadoDiv.textContent = "Buscando...";
 
       try {
-        const response = await fetch(`https://api-partes.onrender.com/buscar?part_number=${encodeURIComponent(numeroParte)}`);
+        const response = await fetch(`${API_BASE}/buscar?part_number=${encodeURIComponent(numeroParte)}`);
 
-
-
-        if (!response.ok) {
-          throw new Error("Error en la solicitud");
-        }
+        if (!response.ok) throw new Error("Error en la solicitud");
 
         const parte = await response.json();
 
         if (parte && parte.part_number) {
+          resultadoDiv.classList.remove("muted");
           resultadoDiv.innerHTML = `
+            <p><strong>Número de Parte:</strong> ${parte.part_number}</p>
             <p><strong>Descripción:</strong> ${parte.description}</p>
             <p><strong>Marca:</strong> ${parte.brand}</p>
-            <p><strong>Costo:</strong> $${parte.cost}</p>
-            <p><strong>Precio 1:</strong> $${parte.price_1}</p>
-            <p><strong>Precio 2:</strong> $${parte.price_2}</p>
-            <p><strong>Precio 3:</strong> $${parte.price_3}</p>
-            <p><strong>Precio 4:</strong> $${parte.price_4}</p>
-            <p><strong>Precio 5:</strong> $${parte.price_5}</p>
+            <p><strong>Costo:</strong> ${fmt(parte.cost)}</p>
+            <hr/>
+            <p><strong>Precio 1 (Retail):</strong> ${fmt(parte.price_1)}</p>
+            <p><strong>Precio Meli:</strong> ${fmt(parte.meli_price)}</p>
+            <p><strong>Flete MIA:</strong> ${fmt(parte.freight_mia)}</p>
+            <p><strong>EMAP:</strong> ${fmt(parte.emap)}</p>
+            <p><strong>Core Charge:</strong> ${fmt(parte.core_charge)}</p>
           `;
         } else {
-          resultadoDiv.innerHTML = "<p>❌ Pieza no encontrada</p>";
+          resultadoDiv.classList.add("muted");
+          resultadoDiv.innerHTML = "❌ Pieza no encontrada";
         }
-      } catch (error) {
-        resultadoDiv.innerHTML = "<p>❌ Error al buscar la pieza</p>";
-        console.error("Error:", error);
+      } catch (err) {
+        console.error(err);
+        resultadoDiv.classList.add("muted");
+        resultadoDiv.textContent = "❌ Error al buscar la pieza";
       }
     }
   </script>
-
 </body>
 </html>
+
+
 
 
 
