@@ -19,7 +19,7 @@
 </head>
 <body>
   <div class="contenedor">
-    <h1>🔍 Buscar Parte</h1>
+    <h1>🔍 NOW PARTS - Buscador</h1>
 
     <div class="fila">
       <input type="text" id="partNumber" placeholder="Ingrese el número de parte" />
@@ -32,7 +32,19 @@
   <script>
     const API_BASE = "https://api-partes.onrender.com";
 
-    const fmt = (v) => (v === null || v === undefined || v === "" ? "N/A" : `$${v}`);
+    // Formateador USD con 2 decimales. Muestra $0.00 si el valor es 0.
+    const usd = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    function money(v) {
+      if (v === null || v === undefined || v === "") return "N/A";
+      const n = Number(v);
+      return Number.isFinite(n) ? usd.format(n) : "N/A";
+    }
 
     async function buscarParte() {
       const numeroParte = document.getElementById("partNumber").value.trim();
@@ -47,7 +59,6 @@
 
       try {
         const response = await fetch(`${API_BASE}/buscar?part_number=${encodeURIComponent(numeroParte)}`);
-
         if (!response.ok) throw new Error("Error en la solicitud");
 
         const parte = await response.json();
@@ -58,17 +69,17 @@
             <p><strong>Número de Parte:</strong> ${parte.part_number}</p>
             <p><strong>Descripción:</strong> ${parte.description}</p>
             <p><strong>Marca:</strong> ${parte.brand}</p>
-            <p><strong>Costo:</strong> ${fmt(parte.cost)}</p>
+            <p><strong>Costo:</strong> ${money(parte.cost)}</p>
             <hr/>
-            <p><strong>Precio 1 (Retail):</strong> ${fmt(parte.price_1)}</p>
-            <p><strong>Precio Meli:</strong> ${fmt(parte.meli_price)}</p>
-            <p><strong>Flete MIA:</strong> ${fmt(parte.freight_mia)}</p>
-            <p><strong>EMAP:</strong> ${fmt(parte.emap)}</p>
-            <p><strong>Core Charge:</strong> ${fmt(parte.core_charge)}</p>
+            <p><strong>Precio X:</strong> ${money(parte.price_1)}</p>
+            <p><strong>Precio Meli:</strong> ${money(parte.meli_price)}</p>
+            <p><strong>Flete a MIA:</strong> ${money(parte.freight_mia)}</p>
+            <p><strong>EMAP:</strong> ${money(parte.emap)}</p>
+            <p><strong>Core Charge:</strong> ${money(parte.core_charge)}</p>
           `;
         } else {
           resultadoDiv.classList.add("muted");
-          resultadoDiv.innerHTML = "❌ Pieza no encontrada";
+          resultadoDiv.textContent = "❌ Pieza no encontrada";
         }
       } catch (err) {
         console.error(err);
@@ -79,6 +90,7 @@
   </script>
 </body>
 </html>
+
 
 
 
