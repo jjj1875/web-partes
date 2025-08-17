@@ -65,18 +65,23 @@
 
         if (parte && parte.part_number) {
           resultadoDiv.classList.remove("muted");
-          resultadoDiv.innerHTML = `
-            <p><strong>Número de Parte:</strong> ${parte.part_number}</p>
-            <p><strong>Descripción:</strong> ${parte.description}</p>
-            <p><strong>Marca:</strong> ${parte.brand}</p>
-            <p><strong>Costo:</strong> ${money(parte.cost)}</p>
-            <hr/>
-            <p><strong>Precio X:</strong> ${money(parte.price_1)}</p>
-            <p><strong>Precio Meli:</strong> ${money(parte.meli_price)}</p>
-            <p><strong>Flete a MIA:</strong> ${money(parte.freight_mia)}</p>
-            <p><strong>EMAP:</strong> ${money(parte.emap)}</p>
-            <p><strong>Core Charge:</strong> ${money(parte.core_charge)}</p>
-          `;
+         resultadoDiv.innerHTML = `
+              <p><strong>Número de Parte:</strong> ${parte.part_number}</p>
+              <p><strong>Descripción:</strong> ${parte.description}</p>
+              <p><strong>Marca:</strong> ${parte.brand}</p>
+              <p><strong>Costo:</strong> ${money(parte.cost)}</p>
+              <hr/>
+              <p><strong>Precio 1 (Retail):</strong> ${money(parte.price_1)}</p>
+              <p><strong>Precio Meli:</strong> ${money(parte.meli_price)}</p>
+              <p><strong>Flete MIA:</strong> ${
+              (!parte.freight_mia || parte.freight_mia === 0)
+                ? "Pendiente de Calculo"
+                : money(parte.freight_mia)
+              }</p>
+              <p><strong>EMAP:</strong> ${money(parte.emap)}</p>
+              <p><strong>Core Charge:</strong> ${money(parte.core_charge)}</p>
+              `;
+
         } else {
           resultadoDiv.classList.add("muted");
           resultadoDiv.textContent = "❌ Pieza no encontrada";
